@@ -10,6 +10,12 @@ Requires __Pillow__ for image manipulation:
 $ pip install -r requirements.txt
 ```
 
+Available arguments:
+* `-W` or `--width` - new width
+* `-H` or `--height` - new height
+* `-S` or `--scale` - scale image according to this number
+* `-O` or `--output` - output image file path
+
 Example of script launch on Linux, Python 3.5:
 
 ```bash
