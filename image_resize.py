@@ -1,13 +1,12 @@
 import argparse
-import os.path
 import sys
 from functools import partial
 
 from PIL import Image
 
 
-def resize_image(path_to_original, width=None, height=None, scale=None):
-    image = Image.open(path_to_original)
+def resize_image(image_file, width, height, scale):
+    image = Image.open(image_file)
     resized_image = None
     if width is not None and height is not None:
         if image.width / image.height != width / height:
@@ -49,7 +48,7 @@ positive_finite_float = partial(positive_finite_number, float)
 
 def load_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("image", nargs="?")
+    parser.add_argument("image", nargs="?", type=argparse.FileType(mode="rb"))
     parser.add_argument("-W", "--width", type=positive_finite_int)
     parser.add_argument("-H", "--height", type=positive_finite_int)
     parser.add_argument("-S", "--scale", type=positive_finite_float)
@@ -70,7 +69,7 @@ if __name__ == "__main__":
             arguments.image, arguments.width, arguments.height, arguments.scale
         )
         if arguments.output is None:
-            basename, extension = arguments.image.rsplit(".", maxsplit=1)
+            basename, extension = arguments.image.name.rsplit(".", maxsplit=1)
             output_filepath = "{}__{}x{}.{}".format(
                 basename, resized_image.width, resized_image.height, extension
             )
@@ -79,5 +78,5 @@ if __name__ == "__main__":
             resized_image.save(arguments.output)
     except FileNotFoundError:
         sys.exit("Image file not found")
-    except OSError as error:
+    except ValueError as error:
         sys.exit(error)
