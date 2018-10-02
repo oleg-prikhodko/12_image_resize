@@ -60,6 +60,9 @@ def load_arguments():
 if __name__ == "__main__":
     try:
         arguments = load_arguments()
+        if arguments.image is None:
+            sys.exit("No image file provided")
+
         if arguments.scale is not None and (
             arguments.width is not None or arguments.height is not None
         ):
@@ -76,7 +79,5 @@ if __name__ == "__main__":
             resized_image.save(output_filepath)
         else:
             resized_image.save(arguments.output)
-    except FileNotFoundError:
-        sys.exit("Image file not found")
-    except ValueError as error:
+    except (ValueError, OSError) as error:
         sys.exit(error)
