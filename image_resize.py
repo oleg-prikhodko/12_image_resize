@@ -18,7 +18,7 @@ def resize_image(image_file, width, height, scale):
     elif width is None and height is not None:
         scale = height / image.height
         resized_image = image.resize((int(image.width * scale), height))
-    elif width is None and height is None and scale is not None:
+    elif scale is not None:
         resized_image = image.resize(
             (int(image.width * scale), int(image.height * scale))
         )
