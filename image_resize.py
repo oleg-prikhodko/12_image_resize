@@ -54,20 +54,20 @@ def load_arguments():
     parser.add_argument("-S", "--scale", type=positive_finite_float)
     parser.add_argument("-O", "--output")
     arguments = parser.parse_args()
+
+    if arguments.image is None:
+        raise ValueError("No image file provided")
+    elif arguments.scale is not None and (
+        arguments.width is not None or arguments.height is not None
+    ):
+        raise ValueError("You should use either width/height or scale option")
+
     return arguments
 
 
 if __name__ == "__main__":
     try:
         arguments = load_arguments()
-        if arguments.image is None:
-            sys.exit("No image file provided")
-
-        if arguments.scale is not None and (
-            arguments.width is not None or arguments.height is not None
-        ):
-            sys.exit("You should use either width and height or scale option")
-
         resized_image = resize_image(
             arguments.image, arguments.width, arguments.height, arguments.scale
         )
