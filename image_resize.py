@@ -27,17 +27,17 @@ def resize_image(image_file, width, height, scale):
     return resized_image
 
 
-def positive_finite_number(numeric_type, value):
-    numeric_value = numeric_type(value)
+def positive_finite_number(numeric_type, input_value):
+    numeric_value = numeric_type(input_value)
     min_value = 0
     max_value = 10000
     if numeric_value <= min_value:
         raise argparse.ArgumentTypeError(
-            "{} is not a positive number".format(value)
+            "{} is not a positive number".format(input_value)
         )
     elif numeric_value > max_value:
         raise argparse.ArgumentTypeError(
-            "{} should not be more than {}".format(value, max_value)
+            "{} should not be more than {}".format(input_value, max_value)
         )
     return numeric_value
 
