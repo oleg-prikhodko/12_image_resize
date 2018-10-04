@@ -42,11 +42,10 @@ def positive_finite_number(numeric_type, input_value):
     return numeric_value
 
 
-positive_finite_int = partial(positive_finite_number, int)
-positive_finite_float = partial(positive_finite_number, float)
-
-
 def load_arguments():
+    positive_finite_int = partial(positive_finite_number, int)
+    positive_finite_float = partial(positive_finite_number, float)
+
     parser = argparse.ArgumentParser()
     parser.add_argument("image", nargs="?", type=argparse.FileType(mode="rb"))
     parser.add_argument("-W", "--width", type=positive_finite_int)
