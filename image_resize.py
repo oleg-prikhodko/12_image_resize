@@ -70,13 +70,12 @@ if __name__ == "__main__":
         resized_image = resize_image(
             arguments.image, arguments.width, arguments.height, arguments.scale
         )
-        if arguments.output is None:
+        output_filepath = arguments.output
+        if output_filepath is None:
             basename, extension = arguments.image.name.rsplit(".", maxsplit=1)
             output_filepath = "{}__{}x{}.{}".format(
                 basename, resized_image.width, resized_image.height, extension
             )
-            resized_image.save(output_filepath)
-        else:
-            resized_image.save(arguments.output)
+        resized_image.save(output_filepath)
     except (ValueError, OSError) as error:
         sys.exit(error)
