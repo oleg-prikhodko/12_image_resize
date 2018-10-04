@@ -1,6 +1,7 @@
 import argparse
 import sys
 from functools import partial
+from os.path import splitext
 
 from PIL import Image
 
@@ -72,8 +73,8 @@ if __name__ == "__main__":
         )
         output_filepath = arguments.output
         if output_filepath is None:
-            basename, extension = arguments.image.name.rsplit(".", maxsplit=1)
-            output_filepath = "{}__{}x{}.{}".format(
+            basename, extension = splitext(arguments.image.name)
+            output_filepath = "{}__{}x{}{}".format(
                 basename, resized_image.width, resized_image.height, extension
             )
         resized_image.save(output_filepath)
