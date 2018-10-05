@@ -1,82 +1,123 @@
 import argparse
 import sys
-from functools import partial
-from os.path import splitext
+from os.path import exists, isdir, splitext
 
 from PIL import Image
 
 
-def resize_image(image_file, width, height, scale):
-    image = Image.open(image_file)
-    resized_image = None
-    if width is not None and height is not None:
-        if image.width / image.height != width / height:
-            print("Aspect ratio will differ from an existing one")
-        resized_image = image.resize((width, height))
-    elif width is not None and height is None:
-        scale = width / image.width
-        resized_image = image.resize((width, int(image.height * scale)))
-    elif width is None and height is not None:
-        scale = height / image.height
-        resized_image = image.resize((int(image.width * scale), height))
-    elif scale is not None:
-        resized_image = image.resize(
-            (int(image.width * scale), int(image.height * scale))
-        )
-    else:
-        return image
-    return resized_image
-
-
-def positive_finite_number(numeric_type, input_value):
-    numeric_value = numeric_type(input_value)
-    min_value = 0
-    max_value = 10000
-    if numeric_value <= min_value:
-        raise argparse.ArgumentTypeError(
-            "{} is not a positive number".format(input_value)
-        )
-    elif numeric_value > max_value:
-        raise argparse.ArgumentTypeError(
-            "{} should not be more than {}".format(input_value, max_value)
-        )
-    return numeric_value
-
-
 def load_arguments():
-    positive_finite_int = partial(positive_finite_number, int)
-    positive_finite_float = partial(positive_finite_number, float)
-
     parser = argparse.ArgumentParser()
-    parser.add_argument("image", nargs="?", type=argparse.FileType(mode="rb"))
-    parser.add_argument("-W", "--width", type=positive_finite_int)
-    parser.add_argument("-H", "--height", type=positive_finite_int)
-    parser.add_argument("-S", "--scale", type=positive_finite_float)
+    parser.add_argument("image", nargs="?")
+    parser.add_argument("-W", "--width", type=int)
+    parser.add_argument("-H", "--height", type=int)
+    parser.add_argument("-S", "--scale", type=float)
     parser.add_argument("-O", "--output")
     arguments = parser.parse_args()
+    return arguments
 
+
+def is_positive_number(input_value):
+    min_value = 0
+    if input_value <= min_value:
+        return False
+    return True
+
+
+def validate_arguments(arguments):
     if arguments.image is None:
         raise ValueError("No image file provided")
+    elif not exists(arguments.image) or isdir(arguments.image):
+        raise argparse.ArgumentTypeError("Invalid image file")
+    elif (
+        splitext(arguments.image)[1].lower() != ".png"
+        and splitext(arguments.image)[1].lower() != ".jpg"
+    ):
+        print(splitext(arguments.image)[1].lower())
+        raise argparse.ArgumentTypeError("Invalid image file format")
+    elif (
+        arguments.scale is None
+        and arguments.width is None
+        and arguments.height is None
+    ):
+        raise ValueError("No arguments provided")
     elif arguments.scale is not None and (
         arguments.width is not None or arguments.height is not None
     ):
         raise ValueError("You should use either width/height or scale option")
+    elif (
+        (
+            arguments.scale is not None
+            and not is_positive_number(arguments.scale)
+        )
+        or (
+            arguments.width is not None
+            and not is_positive_number(arguments.width)
+        )
+        or (
+            arguments.height is not None
+            and not is_positive_number(arguments.height)
+        )
+    ):
+        raise argparse.ArgumentTypeError("Arguments should be positive")
 
-    return arguments
+
+def calculate_dimensions_using_width(old_dimensions, new_width):
+    old_width, old_height = old_dimensions
+    scale_factor = new_width / old_width
+    new_height = int(scale_factor * old_height)
+    return new_width, new_height
+
+
+def calculate_dimensions_using_height(old_dimensions, new_height):
+    old_width, old_height = old_dimensions
+    scale_factor = new_height / old_height
+    new_width = int(scale_factor * old_width)
+    return new_width, new_height
+
+
+def calculate_dimensions_using_scale(old_dimensions, scale_factor):
+    old_width, old_height = old_dimensions
+    new_width = int(scale_factor * old_width)
+    new_height = int(scale_factor * old_height)
+    return new_width, new_height
+
+
+def resize(image, new_dimensions):
+    resized_image = image.resize(new_dimensions)
+    return resized_image
 
 
 if __name__ == "__main__":
     try:
         arguments = load_arguments()
-        resized_image = resize_image(
-            arguments.image, arguments.width, arguments.height, arguments.scale
-        )
+        validate_arguments(arguments)
+
+        image = Image.open(arguments.image)
+
+        if arguments.width is not None and arguments.height is not None:
+            new_dimensions = arguments.width, arguments.height
+        elif arguments.width is not None and arguments.height is None:
+            new_dimensions = calculate_dimensions_using_width(
+                image.size, arguments.width
+            )
+        elif arguments.width is None and arguments.height is not None:
+            new_dimensions = calculate_dimensions_using_height(
+                image.size, arguments.height
+            )
+        else:
+            new_dimensions = calculate_dimensions_using_scale(
+                image.size, arguments.scale
+            )
+
+        resized_image = resize(image, new_dimensions)
+
         output_filepath = arguments.output
         if output_filepath is None:
-            basename, extension = splitext(arguments.image.name)
+            basename, extension = splitext(arguments.image)
             output_filepath = "{}__{}x{}{}".format(
                 basename, resized_image.width, resized_image.height, extension
             )
         resized_image.save(output_filepath)
-    except (ValueError, OSError) as error:
+
+    except (argparse.ArgumentTypeError, OSError, ValueError) as error:
         sys.exit(error)
