@@ -16,6 +16,28 @@ def load_arguments():
     return arguments
 
 
+def has_required_arguments(arguments):
+    if all(
+        (
+            arguments.scale is None,
+            arguments.width is None,
+            arguments.height is None,
+        )
+    ):
+        return False
+    else:
+        return True
+
+
+def has_compatible_arguments(arguments):
+    if arguments.scale is not None and (
+        arguments.width is not None or arguments.height is not None
+    ):
+        return False
+    else:
+        return True
+
+
 def is_positive_number(input_value):
     min_value = 0
     if input_value <= min_value:
@@ -23,43 +45,40 @@ def is_positive_number(input_value):
     return True
 
 
-def validate_arguments(arguments):
-    # TODO function cleanup
-    if arguments.image is None:
-        raise ValueError("No image file provided")
-    elif not exists(arguments.image) or isdir(arguments.image):
-        raise argparse.ArgumentTypeError("Invalid image file")
-    elif (
-        splitext(arguments.image)[1].lower() != ".png"
-        and splitext(arguments.image)[1].lower() != ".jpg"
-    ):
-        print(splitext(arguments.image)[1].lower())
-        raise argparse.ArgumentTypeError("Invalid image file format")
-    elif (
-        arguments.scale is None
-        and arguments.width is None
-        and arguments.height is None
-    ):
-        raise ValueError("No arguments provided")
-    elif arguments.scale is not None and (
-        arguments.width is not None or arguments.height is not None
-    ):
-        raise ValueError("You should use either width/height or scale option")
-    elif (
+def has_positive_arguments(arguments):
+    if any(
         (
             arguments.scale is not None
-            and not is_positive_number(arguments.scale)
-        )
-        or (
+            and not is_positive_number(arguments.scale),
             arguments.width is not None
-            and not is_positive_number(arguments.width)
-        )
-        or (
+            and not is_positive_number(arguments.width),
             arguments.height is not None
-            and not is_positive_number(arguments.height)
+            and not is_positive_number(arguments.height),
         )
     ):
-        raise argparse.ArgumentTypeError("Arguments should be positive")
+        return False
+    else:
+        return True
+
+
+def validate_arguments(arguments):
+    validation_conditions = [
+        (arguments.image is None, "No image file provided"),
+        (not exists(arguments.image), "File does not exist"),
+        (isdir(arguments.image), "Directories is not allowed"),
+        (not has_required_arguments(arguments), "No arguments provided"),
+        (
+            not has_compatible_arguments(arguments),
+            "You should use either width/height or scale option",
+        ),
+        (
+            not has_positive_arguments(arguments),
+            "Arguments should be positive",
+        ),
+    ]
+    for condition, message in validation_conditions:
+        if condition:
+            raise ValueError(message)
 
 
 def calculate_dimensions_using_width(old_dimensions, new_width):
@@ -114,5 +133,5 @@ if __name__ == "__main__":
             )
         resized_image.save(output_filepath)
 
-    except (argparse.ArgumentTypeError, OSError, ValueError) as error:
+    except (OSError, ValueError) as error:
         sys.exit(error)
