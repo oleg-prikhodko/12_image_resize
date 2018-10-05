@@ -82,16 +82,10 @@ def calculate_dimensions_using_scale(old_dimensions, scale_factor):
     return new_width, new_height
 
 
-def resize(image, new_dimensions):
-    resized_image = image.resize(new_dimensions)
-    return resized_image
-
-
 if __name__ == "__main__":
     try:
         arguments = load_arguments()
         validate_arguments(arguments)
-
         image = Image.open(arguments.image)
 
         if arguments.width is not None and arguments.height is not None:
@@ -109,8 +103,7 @@ if __name__ == "__main__":
                 image.size, arguments.scale
             )
 
-        resized_image = resize(image, new_dimensions)
-
+        resized_image = image.resize(new_dimensions)
         output_filepath = arguments.output
         if output_filepath is None:
             basename, extension = splitext(arguments.image)
