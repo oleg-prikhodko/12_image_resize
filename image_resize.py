@@ -16,7 +16,7 @@ def load_arguments():
     return arguments
 
 
-def has_required_arguments(arguments):
+def validate_required_arguments(arguments):
     if all(
         (
             arguments.scale is None,
@@ -24,18 +24,16 @@ def has_required_arguments(arguments):
             arguments.height is None,
         )
     ):
-        return False
-    else:
-        return True
+        raise argparse.ArgumentTypeError("No arguments provided")
 
 
-def has_compatible_arguments(arguments):
+def validate_compatible_arguments(arguments):
     if arguments.scale is not None and (
         arguments.width is not None or arguments.height is not None
     ):
-        return False
-    else:
-        return True
+        raise argparse.ArgumentTypeError(
+            "You should use either width/height or scale option"
+        )
 
 
 def is_positive_number(input_value):
@@ -45,7 +43,7 @@ def is_positive_number(input_value):
     return True
 
 
-def has_positive_arguments(arguments):
+def validate_positive_arguments(arguments):
     if any(
         (
             arguments.scale is not None
@@ -56,26 +54,31 @@ def has_positive_arguments(arguments):
             and not is_positive_number(arguments.height),
         )
     ):
-        return False
-    else:
-        return True
+        raise argparse.ArgumentTypeError("Arguments should be positive")
+
+
+def validate_image_argument(arguments):
+    if arguments.image is None:
+        raise argparse.ArgumentTypeError("No image file provided")
+
+
+def validate_existing_file(arguments):
+    if not exists(arguments.image):
+        raise argparse.ArgumentTypeError("File does not exist")
+
+
+def validate_not_directory(arguments):
+    if isdir(arguments.image):
+        raise argparse.ArgumentTypeError("Directories is not allowed")
 
 
 def validate_arguments(arguments):
-    if arguments.image is None:
-        raise argparse.ArgumentTypeError("No image file provided")
-    elif not exists(arguments.image):
-        raise argparse.ArgumentTypeError("File does not exist")
-    elif isdir(arguments.image):
-        raise argparse.ArgumentTypeError("Directories is not allowed")
-    elif not has_required_arguments(arguments):
-        raise argparse.ArgumentTypeError("No arguments provided")
-    elif not has_compatible_arguments(arguments):
-        raise argparse.ArgumentTypeError(
-            "You should use either width/height or scale option"
-        )
-    elif not has_positive_arguments(arguments):
-        raise argparse.ArgumentTypeError("Arguments should be positive")
+    validate_image_argument(arguments)
+    validate_existing_file(arguments)
+    validate_not_directory(arguments)
+    validate_required_arguments(arguments)
+    validate_compatible_arguments(arguments)
+    validate_positive_arguments(arguments)
 
 
 def calculate_dimensions_using_width(old_dimensions, new_width):
