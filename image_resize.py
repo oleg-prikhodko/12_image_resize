@@ -62,23 +62,20 @@ def has_positive_arguments(arguments):
 
 
 def validate_arguments(arguments):
-    validation_conditions = [
-        (arguments.image is None, "No image file provided"),
-        (not exists(arguments.image), "File does not exist"),
-        (isdir(arguments.image), "Directories is not allowed"),
-        (not has_required_arguments(arguments), "No arguments provided"),
-        (
-            not has_compatible_arguments(arguments),
-            "You should use either width/height or scale option",
-        ),
-        (
-            not has_positive_arguments(arguments),
-            "Arguments should be positive",
-        ),
-    ]
-    for condition, message in validation_conditions:
-        if condition:
-            raise ValueError(message)
+    if arguments.image is None:
+        raise argparse.ArgumentTypeError("No image file provided")
+    elif not exists(arguments.image):
+        raise argparse.ArgumentTypeError("File does not exist")
+    elif isdir(arguments.image):
+        raise argparse.ArgumentTypeError("Directories is not allowed")
+    elif not has_required_arguments(arguments):
+        raise argparse.ArgumentTypeError("No arguments provided")
+    elif not has_compatible_arguments(arguments):
+        raise argparse.ArgumentTypeError(
+            "You should use either width/height or scale option"
+        )
+    elif not has_positive_arguments(arguments):
+        raise argparse.ArgumentTypeError("Arguments should be positive")
 
 
 def calculate_dimensions_using_width(old_dimensions, new_width):
@@ -133,5 +130,5 @@ if __name__ == "__main__":
             )
         resized_image.save(output_filepath)
 
-    except (OSError, ValueError) as error:
+    except (OSError, argparse.ArgumentTypeError) as error:
         sys.exit(error)
