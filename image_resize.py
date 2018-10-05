@@ -24,6 +24,7 @@ def is_positive_number(input_value):
 
 
 def validate_arguments(arguments):
+    # TODO function cleanup
     if arguments.image is None:
         raise ValueError("No image file provided")
     elif not exists(arguments.image) or isdir(arguments.image):
@@ -89,6 +90,7 @@ if __name__ == "__main__":
         image = Image.open(arguments.image)
 
         if arguments.width is not None and arguments.height is not None:
+            print("Aspect ratio will differ from an existing one")
             new_dimensions = arguments.width, arguments.height
         elif arguments.width is not None and arguments.height is None:
             new_dimensions = calculate_dimensions_using_width(
