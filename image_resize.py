@@ -38,9 +38,7 @@ def validate_compatible_arguments(arguments):
 
 def is_positive_number(input_value):
     min_value = 0
-    if input_value <= min_value:
-        return False
-    return True
+    return input_value > min_value
 
 
 def validate_positive_arguments(arguments):
