@@ -118,20 +118,20 @@ if __name__ == "__main__":
         arguments = load_arguments()
         validate_arguments(arguments)
         image = Image.open(arguments.image)
-        new_dimensions = calculate_dimensions(
-            image.size, 
-            arguments.width, 
-            arguments.height, 
-            arguments.scale
-        )
-        resized_image = image.resize(new_dimensions)
-        output_filepath = arguments.output
-        if output_filepath is None:
-            basename, extension = splitext(arguments.image)
-            output_filepath = "{}__{}x{}{}".format(
-                basename, resized_image.width, resized_image.height, extension
-            )
-        resized_image.save(output_filepath)
-
     except (OSError, argparse.ArgumentTypeError) as error:
         sys.exit(error)
+
+    new_dimensions = calculate_dimensions(
+        image.size, 
+        arguments.width, 
+        arguments.height, 
+        arguments.scale
+    )
+    resized_image = image.resize(new_dimensions)
+    output_filepath = arguments.output
+    if output_filepath is None:
+        basename, extension = splitext(arguments.image)
+        output_filepath = "{}__{}x{}{}".format(
+            basename, resized_image.width, resized_image.height, extension
+        )
+    resized_image.save(output_filepath)
