@@ -7,7 +7,7 @@ from PIL import Image
 
 def load_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("image", nargs="?")
+    parser.add_argument("image")
     parser.add_argument("-W", "--width", type=int)
     parser.add_argument("-H", "--height", type=int)
     parser.add_argument("-S", "--scale", type=float)
@@ -55,11 +55,6 @@ def validate_positive_arguments(arguments):
         raise argparse.ArgumentTypeError("Arguments should be positive")
 
 
-def validate_image_argument(arguments):
-    if arguments.image is None:
-        raise argparse.ArgumentTypeError("No image file provided")
-
-
 def validate_existing_file(arguments):
     if not exists(arguments.image):
         raise argparse.ArgumentTypeError("File does not exist")
@@ -71,7 +66,6 @@ def validate_not_directory(arguments):
 
 
 def validate_arguments(arguments):
-    validate_image_argument(arguments)
     validate_existing_file(arguments)
     validate_not_directory(arguments)
     validate_required_arguments(arguments)
@@ -125,9 +119,9 @@ if __name__ == "__main__":
         validate_arguments(arguments)
         image = Image.open(arguments.image)
         new_dimensions = calculate_dimensions(
-            image.size,
-            arguments.width,
-            arguments.height,
+            image.size, 
+            arguments.width, 
+            arguments.height, 
             arguments.scale
         )
         resized_image = image.resize(new_dimensions)
