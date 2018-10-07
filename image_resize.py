@@ -24,7 +24,7 @@ def validate_required_arguments(arguments):
             arguments.height is None,
         )
     ):
-        raise argparse.ArgumentTypeError("No arguments provided")
+        argparse.ArgumentParser().error("No arguments provided")
 
 
 def validate_compatible_arguments(arguments):
