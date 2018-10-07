@@ -96,7 +96,10 @@ def calculate_dimensions_using_scale(old_dimensions, scale_factor):
 
 def calculate_dimensions(old_dimensions, width, height, scale):
     if width is not None and height is not None:
-        print("Aspect ratio will differ from an existing one")
+        old_width, old_height = old_dimensions
+        aspect_ratio = old_width/old_height
+        if width / height != aspect_ratio:
+            print("Aspect ratio will differ from an existing one")
         new_dimensions = width, height
     elif width is not None and height is None:
         new_dimensions = calculate_dimensions_using_width(
