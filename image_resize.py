@@ -121,14 +121,13 @@ if __name__ == "__main__":
         sys.exit(error)
 
     aspect_ratio = image.width / image.height
-    if (arguments.width is not None and arguments.height is not None) and arguments.width / arguments.height != aspect_ratio:
+    if (
+        arguments.width is not None and arguments.height is not None
+    ) and arguments.width / arguments.height != aspect_ratio:
         print("Aspect ratio will differ from an existing one")
 
     new_dimensions = calculate_dimensions(
-        image.size, 
-        arguments.width, 
-        arguments.height, 
-        arguments.scale
+        image.size, arguments.width, arguments.height, arguments.scale
     )
     resized_image = image.resize(new_dimensions)
     output_filepath = arguments.output
