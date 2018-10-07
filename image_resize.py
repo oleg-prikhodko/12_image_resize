@@ -100,21 +100,21 @@ def calculate_dimensions_using_scale(old_dimensions, scale_factor):
     return new_width, new_height
 
 
-def calculate_dimensions(arguments):
-    if arguments.width is not None and arguments.height is not None:
+def calculate_dimensions(old_dimensions, width, height, scale):
+    if width is not None and height is not None:
         print("Aspect ratio will differ from an existing one")
-        new_dimensions = arguments.width, arguments.height
-    elif arguments.width is not None and arguments.height is None:
+        new_dimensions = width, height
+    elif width is not None and height is None:
         new_dimensions = calculate_dimensions_using_width(
-            image.size, arguments.width
+            old_dimensions, width
         )
-    elif arguments.width is None and arguments.height is not None:
+    elif width is None and height is not None:
         new_dimensions = calculate_dimensions_using_height(
-            image.size, arguments.height
+            old_dimensions, height
         )
     else:
         new_dimensions = calculate_dimensions_using_scale(
-            image.size, arguments.scale
+            old_dimensions, scale
         )
     return new_dimensions
 
@@ -124,7 +124,12 @@ if __name__ == "__main__":
         arguments = load_arguments()
         validate_arguments(arguments)
         image = Image.open(arguments.image)
-        new_dimensions = calculate_dimensions(arguments)
+        new_dimensions = calculate_dimensions(
+            image.size,
+            arguments.width,
+            arguments.height,
+            arguments.scale
+        )
         resized_image = image.resize(new_dimensions)
         output_filepath = arguments.output
         if output_filepath is None:
